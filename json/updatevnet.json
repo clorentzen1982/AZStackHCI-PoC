@@ -80,14 +80,14 @@
               "networkSecurityGroup": {
                 "id": "[parameters('labSubnetNSGid')]"
               }
-            },
-            {
-              "name": "AzureBastionSubnet",
-              "properties": {
-                "addressPrefix": "[parameters('bastionSubnetRange')]",
-                "networkSecurityGroup": {
-                  "id": "[parameters('bastionSubnetNSGid')]"
-                }
+            }
+          },
+          {
+            "name": "AzureBastionSubnet",
+            "properties": {
+              "addressPrefix": "[parameters('bastionSubnetRange')]",
+              "networkSecurityGroup": {
+                "id": "[parameters('bastionSubnetNSGid')]"
               }
             }
           }
