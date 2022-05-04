@@ -243,16 +243,16 @@
           "labSubnetRange": {
             "value": "[variables('labSubnetPrefix')]"
           },
-          "labSubnetNSGid": {
+          "labNSGid": {
             "value": "[variables('labNSGid')]"
           },
           "bastionSubnetName": {
             "value": "[variables('bastionSubnetName')]"
           },
           "bastionSubnetRange": {
-            "value": "[variables('bastionSubnetName')]"
+            "value": "[variables('bastionSubnetPrefix')]"
           },
-          "bastionSubnetNSGid": {
+          "bastionNSGid": {
             "value": "[variables('bastionNSGid')]"
           },
           "location": {
@@ -986,17 +986,17 @@
           "labSubnetRange": {
             "value": "[variables('labSubnetPrefix')]"
           },
-          "labSubnetnsgid": {
-            "value": "[variables('labnsgid')]"
+          "labNSGid": {
+            "value": "[variables('labNSGid')]"
           },
           "bastionSubnetName": {
             "value": "[variables('bastionSubnetName')]"
           },
           "bastionSubnetRange": {
-            "value": "[variables('bastionSubnetName')]"
+            "value": "[variables('bastionSubnetPrefix')]"
           },
-          "bastionSubnetnsgid": {
-            "value": "[variables('bastionnsgid')]"
+          "bastionNSGid": {
+            "value": "[variables('bastionNSGid')]"
           },
           "DNSServerAddress": {
             "value": [
