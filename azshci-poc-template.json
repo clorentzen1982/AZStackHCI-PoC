@@ -544,7 +544,7 @@
               "name": "dataDisks",
               "count": "[variables('dataDisksCount')]",
               "input": {
-                "name": "[concat(parameters('virtualMachineName'),'DataDisk',copyIndex('dataDisks'))]",
+                "name": "[concat(parameters('virtualMachineName'),'_datadisk',copyIndex('dataDisks'))]",
                 "diskSizeGB": "[parameters('dataDiskSize')]",
                 "lun": "[copyIndex('dataDisks')]",
                 "createOption": "Empty",
