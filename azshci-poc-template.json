@@ -174,7 +174,7 @@
     "bastionSubnetRef": "[concat(variables('vnetId'), '/Subnets/AzureBastionSubnet')]",
     "dataDisksCount": 8,
     "diagnosticsExtensionName": "Microsoft.Insights.VMDiagnosticsSettings",
-    "dscUri": "https://github.com/clorentzen1982/AZStackHCI-PoC/blob/main/dsc/azshcihost.zip",
+    "dscUri": "https://github.com/Azure/AzureStackHCI-EvalGuide/raw/main/deployment/dsc/azshcihost.zip",
     "environment": "AD Domain",
     "labNSGid": "[resourceId('Microsoft.Network/networkSecurityGroups', variables('labSubnetNSG'))]",
     "labSubnetName": "snet-uks-poc-azshci-lab",
@@ -467,7 +467,7 @@
                 "id": "[variables('bastionPublicIPRef')]"
               },
               "subnet": {
-                "id": "[variables('labSubnetRef')]"
+                "id": "[variables('bastionSubnetRef')]"
               }
             }
           }
