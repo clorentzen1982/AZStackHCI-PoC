@@ -2,28 +2,10 @@
     "$schema": "https://schema.management.azure.com/schemas/2019-04-01/deploymentTemplate.json#",
     "contentVersion": "1.0.0.0",
   "parameters": {
-    "bastionSubnetRange": {
-      "type": "string",
-      "metadata": {
-        "description": "The address range of the bastion Subnet created in the new VNET"
-      }
-    },
     "DNSServerAddress": {
       "type": "array",
       "metadata": {
         "description": "The DNS address(es) of the DNS Server(s) used by the VNET"
-      }
-    },
-    "labSubnetName": {
-      "type": "string",
-      "metadata": {
-        "description": "The name of the lab Subnet created in the new VNET"
-      }
-    },
-    "labSubnetRange": {
-      "type": "string",
-      "metadata": {
-        "description": "The address range of the lab Subnet created in the new VNET"
       }
     },
     "location": {
@@ -59,21 +41,7 @@
           },
           "dhcpOptions": {
              "dnsServers": "[parameters('DNSServerAddress')]"
-          },
-          "Subnets": [
-            {
-               "name": "[parameters('labSubnetName')]",
-               "properties": {
-                 "addressPrefix": "[parameters('labSubnetRange')]"
-                 },
-              {
-                "name": "AzureBastionSubnet",
-                "properties": {
-                  "addressPrefix": "[parameters('bastionSubnetRange')]"
-                }
-              }
-            }
-          ]
+          }
         }
       }
     ]

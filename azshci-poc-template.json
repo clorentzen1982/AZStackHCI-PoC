@@ -967,15 +967,6 @@
           "virtualNetworkAddressRange": {
             "value": "[variables('addressPrefix')]"
           },
-          "labSubnetName": {
-            "value": "[variables('labSubnetName')]"
-          },
-          "labSubnetRange": {
-            "value": "[variables('labSubnetPrefix')]"
-          },
-          "bastionSubnetRange": {
-            "value": "[variables('bastionSubnetPrefix')]"
-          },
           "DNSServerAddress": {
             "value": [
               "[variables('privateIPAddress')]"
