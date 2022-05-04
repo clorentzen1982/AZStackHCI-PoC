@@ -967,6 +967,24 @@
           "virtualNetworkAddressRange": {
             "value": "[variables('addressPrefix')]"
           },
+          "labSubnetName": {
+            "value": "[variables('labSubnetName')]"
+          },
+          "labSubnetRange": {
+            "value": "[variables('labSubnetPrefix')]"
+          },
+          "labSubnetNSGid": {
+            "value": "[variables('labNSGid')]"
+          },
+          "bastionSubnetName": {
+            "value": "AzureBastionSubnet"
+          },
+          "bastionSubnetRange": {
+            "value": "[variables('bastionSubnetPrefix')]"
+          },
+          "bastionSubnetNSGid": {
+            "value": "[variables('bastionNSGid')]"
+          },
           "DNSServerAddress": {
             "value": [
               "[variables('privateIPAddress')]"

@@ -1,7 +1,55 @@
 {
-    "$schema": "https://schema.management.azure.com/schemas/2019-04-01/deploymentTemplate.json#",
-    "contentVersion": "1.0.0.0",
+  "$schema": "https://schema.management.azure.com/schemas/2019-04-01/deploymentTemplate.json#",
+  "contentVersion": "1.0.0.0",
   "parameters": {
+    "virtualNetworkName": {
+      "type": "string",
+      "metadata": {
+        "description": "The name of the Virtual Network to Create"
+      }
+    },
+    "virtualNetworkAddressRange": {
+      "type": "string",
+      "metadata": {
+        "description": "The address range of the new VNET in CIDR format"
+      }
+    },
+    "labSubnetName": {
+      "type": "string",
+      "metadata": {
+        "description": "The name of the lab Subnet created in the new VNET"
+      }
+    },
+    "labSubnetRange": {
+      "type": "string",
+      "metadata": {
+        "description": "The address range of the lab Subnet created in the new VNET"
+      }
+    },
+    "labSubnetNSGid": {
+      "type": "string",
+      "metadata": {
+        "description": "The NSG for the lab Subnet created in the new VNET"
+      }
+    },
+    "bastionSubnetName": {
+      "type": "string",
+      "metadata": {
+        "description": "The name of the bastion Subnet created in the new VNET"
+      }
+    },
+    "bastionSubnetRange": {
+      "type": "string",
+      "metadata": {
+        "description": "The address range of the bastion Subnet created in the new VNET"
+      }
+    },
+    "bastionSubnetNSGid": {
+      "type": "string",
+      "metadata": {
+        "description": "The NSG for the bastion Subnet created in the new VNET"
+      }
+    },
     "DNSServerAddress": {
       "type": "array",
       "metadata": {
@@ -13,36 +61,44 @@
       "metadata": {
         "description": "Location for all resources."
       }
-    },
-    "virtualNetworkAddressRange": {
-      "type": "string",
-      "metadata": {
-        "description": "The address range of the new VNET in CIDR format"
-      }
-    },
-    "virtualNetworkName": {
-      "type": "string",
-      "metadata": {
-        "description": "The name of the Virtual Network to Create"
-      }
     }
   },
-    "resources": [
-      {
-          "type": "Microsoft.Network/virtualNetworks",
-          "name": "[parameters('virtualNetworkName')]",
-          "apiVersion": "2020-11-01",
-          "location": "[parameters('location')]",
-          "properties": {
-             "addressSpace": {
-                "addressPrefixes": [
-                   "[parameters('virtualNetworkAddressRange')]"
-                ]
-          },
-          "dhcpOptions": {
-             "dnsServers": "[parameters('DNSServerAddress')]"
+  "resources": [
+    {
+      "type": "Microsoft.Network/virtualNetworks",
+      "name": "[parameters('virtualNetworkName')]",
+      "apiVersion": "2020-11-01",
+      "location": "[parameters('location')]",
+      "properties": {
+        "addressSpace": {
+          "addressPrefixes": [
+            "[parameters('virtualNetworkAddressRange')]"
+          ]
+        },
+        "dhcpOptions": {
+          "dnsServers": "[parameters('DNSServerAddress')]"
+        },
+        "Subnets": [
+          {
+            "name": "[parameters('labSubnetName')]",
+            "properties": {
+              "addressPrefix": "[parameters('labSubnetRange')]",
+              "networkSecurityGroup": {
+                "id": "[parameters('labSubnetNSGid')]"
+              }
+            },
+            {
+              "name": "[parameters('bastionSubnetName')]",
+              "properties": {
+                "addressPrefix": "[parameters('bastionSubnetRange')]",
+                "networkSecurityGroup": {
+                  "id": "[parameters('bastionSubnetNSGid')]"
+                }
+              }
+            }
           }
-        }
+        ]
       }
-    ]
+    }
+  ]
 }
