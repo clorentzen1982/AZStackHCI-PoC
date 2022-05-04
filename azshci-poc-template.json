@@ -162,7 +162,7 @@
   },
   "variables": {
     "addressPrefix": "10.0.0.0/22",
-    "artifactsLocation": "C:\\cbltemp\\AzureDevOps\\AzureStack HCI PoC",
+    "artifactsLocation": "https://raw.githubusercontent.com/clorentzen1982/AZStackHCI-PoC/main/",
     "bastionIPConfRef": "[concat(variables('bastionId'), '/bastionHostIpConfigurations/IpConf')]",
     "bastionName": "bas-b-vnet-uks-poc-azshci-network",
     "bastionNSGid": "[resourceId('Microsoft.Network/networkSecurityGroups', variables('bastionSubnetNSG'))]",
@@ -175,7 +175,7 @@
     "bastionSubnetRef": "[concat(variables('vnetId'), '/Subnets/', variables('bastionSubnetName'))]",
     "dataDisksCount": 8,
     "diagnosticsExtensionName": "Microsoft.Insights.VMDiagnosticsSettings",
-    "dscUri": "C:\\cbltemp\\AzureDevOps\\AzureStack HCI PoC\\dscazshcihost.zip",
+    "dscUri": "https://github.com/clorentzen1982/AZStackHCI-PoC/blob/main/dsc/azshcihost.zip",
     "environment": "AD Domain",
     "labNSGid": "[resourceId('Microsoft.Network/networkSecurityGroups', variables('labSubnetNSG'))]",
     "labSubnetName": "snet-uks-poc-azshci-lab",
