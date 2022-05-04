@@ -205,6 +205,158 @@
       }
     },
     {
+      "name": "[variables('labSubnetnsg')]",
+      "type": "Microsoft.Network/networkSecurityGroups",
+      "apiVersion": "2020-11-01",
+      "location": "[resourceGroup().location]",
+      "tags": {
+        "environment": "r&d",
+        "purpose": "network security group",
+        "region": "uks",
+        "general": "azure stack hci poc environment network security group - azure stack hci lab Subnet",
+        "owner": "chris lorentzen p10357509@capita.co.uk",
+        "costcentre": "jtch",
+        "wbscode": "o1-0001400",
+        "status": "notsupported",
+        "dr": "no",
+        "supporthours": "08:00-18:00 M-F"
+      }
+    },
+    {
+      "name": "[variables('bastionSubnetnsg')]",
+      "type": "Microsoft.Network/networkSecurityGroups",
+      "apiVersion": "2020-11-01",
+      "location": "[resourceGroup().location]",
+      "tags": {
+        "environment": "r&d",
+        "purpose": "network security group",
+        "region": "uks",
+        "general": "azure stack hci poc environment network security group - azure stack hci bastion Subnet",
+        "owner": "chris lorentzen p10357509@capita.co.uk",
+        "costcentre": "jtch",
+        "wbscode": "o1-0001400",
+        "status": "notsupported",
+        "dr": "no",
+        "supporthours": "08:00-18:00 M-F"
+      },
+      "properties": {
+        "securityRules": [
+          {
+            "name": "AllowHttpsInbound",
+            "properties": {
+              "priority": 100,
+              "protocol": "Tcp",
+              "access": "Allow",
+              "description": "Ingress Traffic from public internet",
+              "direction": "Inbound",
+              "sourceAddressPrefix": "Internet",
+              "sourcePortRange": "*",
+              "destinationAddressPrefix": "*",
+              "destinationPortRange": "443"
+            }
+          },
+          {
+            "name": "AllowGatewayManagerInbound",
+            "properties": {
+              "priority": 110,
+              "protocol": "Tcp",
+              "access": "Allow",
+              "description": "Ingress Traffic from Azure Bastion control plane",
+              "direction": "Inbound",
+              "sourceAddressPrefix": "GatewayManager",
+              "sourcePortRange": "*",
+              "destinationAddressPrefix": "*",
+              "destinationPortRange": "443"
+            }
+          },
+          {
+            "name": "AllowAzureLoadBalancerInbound",
+            "properties": {
+              "priority": 120,
+              "protocol": "Tcp",
+              "access": "Allow",
+              "description": "Ingress Traffic from Azure Load Balancer",
+              "direction": "Inbound",
+              "sourceAddressPrefix": "AzureLoadBalancer",
+              "sourcePortRange": "*",
+              "destinationAddressPrefix": "*",
+              "destinationPortRange": "443"
+            }
+          },
+          {
+            "name": "AllowBastionHostCommunication",
+            "properties": {
+              "priority": 130,
+              "protocol": "*",
+              "access": "Allow",
+              "description": "Ingress Traffic from Azure Bastion data plane",
+              "direction": "Inbound",
+              "sourceAddressPrefix": "VirtualNetwork",
+              "sourcePortRange": "*",
+              "destinationAddressPrefix": "VirtualNetwork",
+              "destinationPortRanges": [ "5071", "8080" ]
+            }
+          },
+          {
+            "name": "AllowSshRdpOutbound",
+            "properties": {
+              "priority": 100,
+              "protocol": "*",
+              "access": "Allow",
+              "description": "Egress Traffic to target VMs",
+              "direction": "Outbound",
+              "sourceAddressPrefix": "*",
+              "sourcePortRange": "*",
+              "destinationAddressPrefix": "VirtualNetwork",
+              "destinationPortRanges": [ "22", "2806", "3389" ]
+            }
+          },
+          {
+            "name": "AllowAzureCloudOutbound",
+            "properties": {
+              "priority": 110,
+              "protocol": "*",
+              "access": "Allow",
+              "description": "Egress Traffic to other public endpoints in Azure",
+              "direction": "Outbound",
+              "sourceAddressPrefix": "*",
+              "sourcePortRange": "*",
+              "destinationAddressPrefix": "AzureCloud",
+              "destinationPortRange": "443"
+            }
+          },
+          {
+            "name": "AllowBastionCommunication",
+            "properties": {
+              "priority": 120,
+              "protocol": "*",
+              "access": "Allow",
+              "description": "Egress Traffic to Azure Bastion data plane",
+              "direction": "Outbound",
+              "sourceAddressPrefix": "VirtualNetwork",
+              "sourcePortRange": "*",
+              "destinationAddressPrefix": "VirtualNetwork",
+              "destinationPortRanges": [ "5071", "8080" ]
+            }
+          },
+          {
+            "name": "AllowGetSessionInformation",
+            "properties": {
+              "priority": 130,
+              "protocol": "*",
+              "access": "Allow",
+              "description": "Egress Traffic to Internet",
+              "direction": "Outbound",
+              "sourceAddressPrefix": "*",
+              "sourcePortRange": "*",
+              "destinationAddressPrefix": "Internet",
+              "destinationPortRange": "80"
+            }
+          }
+        ]
+      }
+    },
+    {
       "type": "Microsoft.Resources/deployments",
       "apiVersion": "2021-04-01",
       "name": "[variables('virtualNetworkName')]",
@@ -220,10 +372,6 @@
         "dr": "no",
         "supporthours": "08:00-18:00 M-F"
       },
-      "dependsOn": [
-        "[concat('Microsoft.Network/networkSecurityGroups/', variables('labSubnetNSG'))]",
-        "[concat('Microsoft.Network/networkSecurityGroups/', variables('bastionSubnetNSG'))]"
-      ],
       "properties": {
         "mode": "Incremental",
         "templateLink": {
@@ -336,158 +484,6 @@
       },
       "sku": {
         "name": "Basic"
-      }
-    },
-    {
-      "name": "[variables('labSubnetnsg')]",
-      "type": "Microsoft.Network/networkSecurityGroups",
-      "apiVersion": "2020-11-01",
-      "location": "[resourceGroup().location]",
-      "tags": {
-        "environment": "r&d",
-        "purpose": "network security group",
-        "region": "uks",
-        "general": "azure stack hci poc environment network security group - azure stack hci lab Subnet",
-        "owner": "chris lorentzen p10357509@capita.co.uk",
-        "costcentre": "jtch",
-        "wbscode": "o1-0001400",
-        "status": "notsupported",
-        "dr": "no",
-        "supporthours": "08:00-18:00 M-F"
-      }
-    },
-    {
-      "name": "[variables('bastionSubnetnsg')]",
-      "type": "Microsoft.Network/networkSecurityGroups",
-      "apiVersion": "2020-11-01",
-      "location": "[resourceGroup().location]",
-      "tags": {
-        "environment": "r&d",
-        "purpose": "network security group",
-        "region": "uks",
-        "general": "azure stack hci poc environment network security group - azure stack hci bastion Subnet",
-        "owner": "chris lorentzen p10357509@capita.co.uk",
-        "costcentre": "jtch",
-        "wbscode": "o1-0001400",
-        "status": "notsupported",
-        "dr": "no",
-        "supporthours": "08:00-18:00 M-F"
-      },
-      "properties": {
-        "securityRules": [
-          {
-            "name": "AllowHttpsInbound",
-            "properties": {
-              "priority": 100,
-              "protocol": "Tcp",
-              "access": "Allow",
-              "description": "Ingress Traffic from public internet",
-              "direction": "Inbound",
-              "sourceAddressPrefix": "Internet",
-              "sourcePortRange": "*",
-              "destinationAddressPrefix": "*",
-              "destinationPortRange": "443"
-            }
-          },
-          {
-            "name": "AllowGatewayManagerInbound",
-            "properties": {
-              "priority": 110,
-              "protocol": "Tcp",
-              "access": "Allow",
-              "description": "Ingress Traffic from Azure Bastion control plane",
-              "direction": "Inbound",
-              "sourceAddressPrefix": "GatewayManager",
-              "sourcePortRange": "*",
-              "destinationAddressPrefix": "*",
-              "destinationPortRange": "443"
-            }
-          },
-          {
-            "name": "AllowAzureLoadBalancerInbound",
-            "properties": {
-              "priority": 120,
-              "protocol": "Tcp",
-              "access": "Allow",
-              "description": "Ingress Traffic from Azure Load Balancer",
-              "direction": "Inbound",
-              "sourceAddressPrefix": "AzureLoadBalancer",
-              "sourcePortRange": "*",
-              "destinationAddressPrefix": "*",
-              "destinationPortRange": "443"
-            }
-          },
-          {
-            "name": "AllowBastionHostCommunication",
-            "properties": {
-              "priority": 130,
-              "protocol": "*",
-              "access": "Allow",
-              "description": "Ingress Traffic from Azure Bastion data plane",
-              "direction": "Inbound",
-              "sourceAddressPrefix": "VirtualNetwork",
-              "sourcePortRange": "*",
-              "destinationAddressPrefix": "VirtualNetwork",
-              "destinationPortRanges": [ "5071","8080" ]
-            }
-          },
-          {
-            "name": "AllowSshRdpOutbound",
-            "properties": {
-              "priority": 100,
-              "protocol": "*",
-              "access": "Allow",
-              "description": "Egress Traffic to target VMs",
-              "direction": "Outbound",
-              "sourceAddressPrefix": "*",
-              "sourcePortRange": "*",
-              "destinationAddressPrefix": "VirtualNetwork",
-              "destinationPortRanges": [ "22","2806","3389" ]
-            }
-          },
-          {
-            "name": "AllowAzureCloudOutbound",
-            "properties": {
-              "priority": 110,
-              "protocol": "*",
-              "access": "Allow",
-              "description": "Egress Traffic to other public endpoints in Azure",
-              "direction": "Outbound",
-              "sourceAddressPrefix": "*",
-              "sourcePortRange": "*",
-              "destinationAddressPrefix": "AzureCloud",
-              "destinationPortRange": "443"
-            }
-          },
-          {
-            "name": "AllowBastionCommunication",
-            "properties": {
-              "priority": 120,
-              "protocol": "*",
-              "access": "Allow",
-              "description": "Egress Traffic to Azure Bastion data plane",
-              "direction": "Outbound",
-              "sourceAddressPrefix": "VirtualNetwork",
-              "sourcePortRange": "*",
-              "destinationAddressPrefix": "VirtualNetwork",
-              "destinationPortRanges": [ "5071","8080" ]
-            }
-          },
-          {
-            "name": "AllowGetSessionInformation",
-            "properties": {
-              "priority": 130,
-              "protocol": "*",
-              "access": "Allow",
-              "description": "Egress Traffic to Internet",
-              "direction": "Outbound",
-              "sourceAddressPrefix": "*",
-              "sourcePortRange": "*",
-              "destinationAddressPrefix": "Internet",
-              "destinationPortRange": "80"
-            }
-          }
-        ]
       }
     },
     {
