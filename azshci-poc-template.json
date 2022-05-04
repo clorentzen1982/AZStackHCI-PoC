@@ -372,6 +372,10 @@
         "dr": "no",
         "supporthours": "08:00-18:00 M-F"
       },
+      "dependsOn": [
+        "[variables('labSubnetnsg')]",
+        "[variables('bastionSubnetnsg')]"
+      ],
       "properties": {
         "addressSpace": {
           "addressPrefixes": [
