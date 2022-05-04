@@ -976,9 +976,6 @@
           "labSubnetNSGid": {
             "value": "[variables('labNSGid')]"
           },
-          "bastionSubnetName": {
-            "value": "AzureBastionSubnet"
-          },
           "bastionSubnetRange": {
             "value": "[variables('bastionSubnetPrefix')]"
           },
