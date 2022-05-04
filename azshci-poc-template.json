@@ -169,10 +169,9 @@
     "bastionPublicIPName": "pip-s-bas-b-vnet-uks-poc-azshci-network",
     "bastionPublicIPRef": "[resourceId('Microsoft.Network/publicIPAddresses', variables('bastionPublicIPName'))]",
     "bastionId": "[resourceId('Microsoft.Networks/bastionHosts', variables('bastionName'))]",
-    "bastionSubnetName": "AzureBastionSubnet",
     "bastionSubnetNSG": "nsg-uks-poc-azshci-bastion",
     "bastionSubnetPrefix": "10.0.3.192/26",
-    "bastionSubnetRef": "[concat(variables('vnetId'), '/Subnets/', variables('bastionSubnetName'))]",
+    "bastionSubnetRef": "[concat(variables('vnetId'), '/Subnets/AzureBastionSubnet')]",
     "dataDisksCount": 8,
     "diagnosticsExtensionName": "Microsoft.Insights.VMDiagnosticsSettings",
     "dscUri": "https://github.com/clorentzen1982/AZStackHCI-PoC/blob/main/dsc/azshcihost.zip",
@@ -390,7 +389,7 @@
             }
           },
           {
-            "name": "[variables('bastionSubnetName')]",
+            "name": "AzureBastionSubnet",
             "properties": {
               "addressPrefix": "[variables('bastionSubnetPrefix')]",
               "networkSecurityGroup": {
@@ -973,9 +972,6 @@
           },
           "labSubnetRange": {
             "value": "[variables('labSubnetPrefix')]"
-          },
-          "bastionSubnetName": {
-            "value": "[variables('bastionSubnetName')]"
           },
           "bastionSubnetRange": {
             "value": "[variables('bastionSubnetPrefix')]"

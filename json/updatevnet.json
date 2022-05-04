@@ -2,12 +2,6 @@
     "$schema": "https://schema.management.azure.com/schemas/2019-04-01/deploymentTemplate.json#",
     "contentVersion": "1.0.0.0",
   "parameters": {
-    "bastionSubnetName": {
-      "type": "string",
-      "metadata": {
-        "description": "The name of the bastion Subnet created in the new VNET"
-      }
-    },
     "bastionSubnetRange": {
       "type": "string",
       "metadata": {
@@ -72,11 +66,11 @@
                "properties": {
                  "addressPrefix": "[parameters('labSubnetRange')]"
                  },
-					    {
-               "name": "[parameters('bastionSubnetName')]",
-               "properties": {
-                 "addressPrefix": "[parameters('bastionSubnetRange')]"
-							   }
+              {
+                "name": "AzureBastionSubnet",
+                "properties": {
+                  "addressPrefix": "[parameters('bastionSubnetRange')]"
+                }
               }
             }
           ]
