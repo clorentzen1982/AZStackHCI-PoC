@@ -1,0 +1,69 @@
+{
+  "$schema": "https://schema.management.azure.com/schemas/2019-04-01/deploymentParameters.json#",
+  "contentVersion": "1.0.0.0",
+  "parameters": {
+    "virtualMachineName": {
+      "value": "azshcipoclab"
+    },
+    "virtualMachineSize": {
+      "value": "Standard_E16s_v4"
+    },
+    "virtualMachineGeneration": {
+      "value": "Generation 2"
+    },
+    "domainName": {
+      "value": "azshci.local"
+    },
+    "dataDiskType": {
+      "value": "StandardSSD_LRS"
+    },
+    "dataDiskSize": {
+      "value": "128"
+    },
+    "adminUsername": {
+      "value": "d-azshciadmin"
+    },
+    "adminPassword": {
+      "value": "h7RACli9xHQliiBY"
+    },
+    "enableDHCP": {
+      "value": "Enabled"
+    },
+    "customRdpPort": {
+      "value": "3389"
+    },
+    "patchMode": {
+      "value": "Manual"
+    },
+    "enableHotpatching": {
+      "value": false
+    },
+    "diagnosticsStorageAccountName": {
+      "value": "sa6d4duksbootdiag"
+    },
+    "diagnosticsStorageAccountId": {
+      "value": "/subscriptions/6d4d671b-3535-48bf-b9f1-f2f36369205c/resourceGroups/rg-uks-cbl-poc-logging/providers/Microsoft.Storage/storageAccounts/sa6d4duksbootdiag"
+    },
+    "autoShutdownStatus": {
+      "value": "Enabled"
+    },
+    "autoShutdownTime": {
+      "value": "18:00"
+    },
+    "autoShutdownTimeZone": {
+      "value": "UTC"
+    },
+    "autoShutdownNotificationStatus": {
+      "value": "Enabled"
+    },
+    "autoShutdownNotificationLocale": {
+      "value": "en"
+    },
+    "autoShutdownNotificationEmail": {
+      "value": "christian.lorentzen@capita.com"
+    },
+    "alreadyHaveAWindowsServerLicense": {
+      "value": "No"
+    }
+  }
+}

@@ -1,0 +1,1023 @@
+{
+  "$schema": "https://schema.management.azure.com/schemas/2019-04-01/deploymentTemplate.json#",
+  "contentVersion": "1.0.0.0",
+  "parameters": {
+    "virtualMachineName": {
+      "type": "string",
+      "defaultValue": "azshcipoclab",
+      "metadata": {
+        "description": "Keep the VM name to less than 15 characters"
+      }
+    },
+    "virtualMachineSize": {
+      "type": "string",
+      "defaultValue": "Standard_E16s_v4",
+      "allowedValues": [
+        "Standard_D16s_v3",
+        "Standard_D16s_v4",
+        "Standard_D16d_v4",
+        "Standard_D16ds_v4",
+        "Standard_E8s_v3",
+        "Standard_E16s_v3",
+        "Standard_E16-4s_v3",
+        "Standard_E16-8s_v3",
+        "Standard_E8s_v4",
+        "Standard_E16s_v4",
+        "Standard_E16-8s_v4",
+        "Standard_E8d_v4",
+        "Standard_E16d_v4",
+        "Standard_E8ds_v4",
+        "Standard_E16ds_v4"
+      ]
+    },
+    "virtualMachineGeneration": {
+      "type": "string",
+      "defaultValue": "Generation 2",
+      "allowedValues": [
+        "Generation 1",
+        "Generation 2"
+      ],
+      "metadata": {
+        "description": "Select your VM generation, ideally Gen 2. Not all Azure regions support Gen 2 VMs."
+      }
+    },
+    "domainName": {
+      "type": "string",
+      "defaultValue": "azshci.local",
+      "metadata": {
+        "description": "The FQDN that will be used in the environment"
+      }
+    },
+    "dataDiskType": {
+      "type": "string",
+      "defaultValue": "StandardSSD_LRS",
+      "allowedValues": [
+        "StandardSSD_LRS",
+        "Premium_LRS"
+      ],
+      "metadata": {
+        "description": "The Storage type of the VM data disk. If your VM contains an 's' in the VM size, you can select Premium_LRS storage for increased performance, but at a higher cost."
+      }
+    },
+    "dataDiskSize": {
+      "type": "string",
+      "defaultValue": "128",
+      "allowedValues": [
+        "32",
+        "64",
+        "128",
+        "256",
+        "512",
+        "1024"
+      ],
+      "metadata": {
+        "description": "The size of the individual data disks in GiB. 8 of these will be provisioned therefore 32GiB is the recommended default."
+      }
+    },
+    "adminUsername": {
+      "type": "string",
+      "defaultValue": "d-azshciadmin"
+    },
+    "adminPassword": {
+      "type": "securestring",
+      "defaultValue": ""
+    },
+    "enableDHCP": {
+      "type": "string",
+      "defaultValue": "Enabled",
+      "allowedValues": [
+        "Enabled",
+        "Disabled"
+      ],
+      "metadata": {
+        "description": "Choose whether you wish to enable DHCP in the environment. If you choose Disabled, it can be enabled after deployment."
+      }
+    },
+    "customRdpPort": {
+      "type": "string",
+      "defaultValue": "3389",
+      "metadata": {
+        "description": "If you wish to use a different port to RDP into the VM (between 0 and 65535), change it here, otherwise, leave the default."
+      }
+    },
+    "patchMode": {
+      "type": "string",
+      "defaultValue": "Manual"
+    },
+    "enableHotpatching": {
+      "type": "bool",
+      "defaultValue": "false"
+    },
+    "diagnosticsStorageAccountName": {
+      "type": "string",
+      "defaultValue": "sa6d4duksbootdiag"
+    },
+    "diagnosticsStorageAccountId": {
+      "type": "string",
+      "defaultValue": "/subscriptions/6d4d671b-3535-48bf-b9f1-f2f36369205c/resourceGroups/rg-uks-cbl-poc-logging/providers/Microsoft.Storage/storageAccounts/sa6d4duksbootdiag"
+    },
+    "autoShutdownStatus": {
+      "type": "string",
+      "defaultValue": "Enabled",
+      "allowedValues": [
+        "Enabled",
+        "Disabled"
+      ]
+    },
+    "autoShutdownTime": {
+      "type": "string",
+      "defaultValue": "18:00"
+    },
+    "autoShutdownTimeZone": {
+      "type": "string",
+      "defaultValue": "UTC",
+      "allowedValues": [
+        "GMT Standard Time",
+        "UTC"
+      ]
+    },
+    "autoShutdownNotificationStatus": {
+      "type": "string",
+      "defaultValue": "Enabled"
+    },
+    "autoShutdownNotificationLocale": {
+      "type": "string",
+      "defaultValue": "en"
+    },
+    "autoShutdownNotificationEmail": {
+      "type": "string",
+      "defaultValue": "christian.lorentzen@capita.com"
+    },
+    "alreadyHaveAWindowsServerLicense": {
+      "type": "string",
+      "defaultValue": "No",
+      "allowedValues": [
+        "Yes",
+        "No"
+      ],
+      "metadata": {
+        "description": "By selecting Yes, you confirm you have an eligible Windows Server license with Software Assurance or Windows Server subscription to apply this Azure Hybrid Benefit. You can read more about compliance here: http://go.microsoft.com/fwlink/?LinkId=859786"
+      }
+    }
+  },
+  "variables": {
+    "addressPrefix": "10.0.0.0/22",
+    "artifactsLocation": "C:\\cbltemp\\AzureDevOps\\AzureStack HCI PoC",
+    "bastionIPConfRef": "[concat(variables('bastionId'), '/bastionHostIpConfigurations/IpConf')]",
+    "bastionName": "bas-b-vnet-uks-poc-azshci-network",
+    "bastionNSGid": "[resourceId('Microsoft.Network/networkSecurityGroups', variables('bastionSubnetNSG'))]",
+    "bastionPublicIPName": "pip-s-bas-b-vnet-uks-poc-azshci-network",
+    "bastionPublicIPRef": "[resourceId('Microsoft.Network/publicIPAddresses', variables('bastionPublicIPName'))]",
+    "bastionId": "[resourceId('Microsoft.Networks/bastionHosts', variables('bastionName'))]",
+    "bastionSubnetName": "AzureBastionSubnet",
+    "bastionSubnetNSG": "nsg-uks-poc-azshci-bastion",
+    "bastionSubnetPrefix": "10.0.3.192/26",
+    "bastionSubnetRef": "[concat(variables('vnetId'), '/Subnets/', variables('bastionSubnetName'))]",
+    "dataDisksCount": 8,
+    "diagnosticsExtensionName": "Microsoft.Insights.VMDiagnosticsSettings",
+    "dscUri": "C:\\cbltemp\\AzureDevOps\\AzureStack HCI PoC\\dscazshcihost.zip",
+    "environment": "AD Domain",
+    "labNSGid": "[resourceId('Microsoft.Network/networkSecurityGroups', variables('labSubnetNSG'))]",
+    "labSubnetName": "snet-uks-poc-azshci-lab",
+    "labSubnetNSG": "nsg-uks-poc-azshci-lab",
+    "labSubnetPrefix": "10.0.0.0/24",
+    "labSubnetRef": "[concat(variables('vnetId'), '/Subnets/', variables('labSubnetName'))]",
+    "networkInterfaceName": "azshcipoclab-nic01",
+    "privateIPAddress": "10.0.0.4",
+    "virtualNetworkName": "vnet-uks-poc-azshci-network",
+    "vnetId": "[resourceId('Microsoft.Network/virtualNetworks', variables('virtualNetworkName'))]"
+  },
+  "resources": [
+    {
+      "name": "pip-s-bas-b-vnet-uks-poc-azshci-network",
+      "type": "Microsoft.Network/publicIpAddresses",
+      "apiVersion": "2020-11-01",
+      "location": "[resourceGroup().location]",
+      "sku": {
+        "name": "Standard",
+        "tier": "Regional"
+      },
+      "properties": {
+        "publicIpAllocationMethod": "Static",
+        "dnsSettings": {
+          "domainNameLabel": "bas-b-vnet-uks-poc-azshci-network"
+        }
+      }
+    },
+    {
+      "type": "Microsoft.Resources/deployments",
+      "apiVersion": "2021-04-01",
+      "name": "[variables('virtualNetworkName')]",
+      "tags": {
+        "environment": "r&d",
+        "purpose": "virtual network",
+        "region": "uks",
+        "general": "azure stack hci poc environment virtual network",
+        "owner": "chris lorentzen p10357509@capita.co.uk",
+        "costcentre": "jtch",
+        "wbscode": "o1-0001400",
+        "status": "notsupported",
+        "dr": "no",
+        "supporthours": "08:00-18:00 M-F"
+      },
+      "dependsOn": [
+        "[concat('Microsoft.Network/networkSecurityGroups/', variables('labSubnetNSG'))]",
+        "[concat('Microsoft.Network/networkSecurityGroups/', variables('bastionSubnetNSG'))]"
+      ],
+      "properties": {
+        "mode": "Incremental",
+        "templateLink": {
+          "uri": "[uri(variables('artifactsLocation'), concat('json/vnet.json'))]",
+          "contentVersion": "1.0.0.0"
+        },
+        "parameters": {
+          "virtualNetworkName": {
+            "value": "[variables('virtualNetworkName')]"
+          },
+          "virtualNetworkAddressRange": {
+            "value": "[variables('addressPrefix')]"
+          },
+          "labSubnetName": {
+            "value": "[variables('labSubnetName')]"
+          },
+          "labSubnetRange": {
+            "value": "[variables('labSubnetPrefix')]"
+          },
+          "labSubnetNSGid": {
+            "value": "[variables('labNSGid')]"
+          },
+          "bastionSubnetName": {
+            "value": "[variables('bastionSubnetName')]"
+          },
+          "bastionSubnetRange": {
+            "value": "[variables('bastionSubnetName')]"
+          },
+          "bastionSubnetNSGid": {
+            "value": "[variables('bastionNSGid')]"
+          },
+          "location": {
+            "value": "[resourceGroup().location]"
+          }
+        }
+      }
+    },
+    {
+      "name": "[variables('networkInterfaceName')]",
+      "type": "Microsoft.Network/networkInterfaces",
+      "apiVersion": "2020-11-01",
+      "location": "[resourceGroup().location]",
+      "tags": {
+        "environment": "r&d",
+        "purpose": "virtual network adapter",
+        "region": "uks",
+        "general": "azure stack hci poc environment virtual network adapter - azure stack hci lab host nic 01",
+        "owner": "chris lorentzen p10357509@capita.co.uk",
+        "costcentre": "jtch",
+        "wbscode": "o1-0001400",
+        "status": "notsupported",
+        "dr": "no",
+        "supporthours": "08:00-18:00 M-F"
+      },
+      "dependsOn": [
+        "[variables('virtualNetworkName')]"
+      ],
+      "properties": {
+        "ipConfigurations": [
+          {
+            "name": "ipconfig1",
+            "properties": {
+              "Subnet": {
+                "id": "[variables('labSubnetRef')]"
+              },
+              "privateIPAllocationMethod": "Static",
+              "privateIPAddress": "[variables('privateIPAddress')]"
+            }
+          }
+        ]
+      }
+    },
+    {
+      "name": "[variables('bastionName')]",
+      "type": "Microsoft.Network/bastionHosts",
+      "apiVersion": "2021-05-01",
+      "location": "[resourceGroup().location]",
+      "tags": {
+        "environment": "r&d",
+        "purpose": "azure bastion",
+        "region": "uks",
+        "general": "azure stack hci poc environment azure bastion",
+        "owner": "chris lorentzen p10357509@capita.co.uk",
+        "costcentre": "jtch",
+        "wbscode": "o1-0001400",
+        "status": "notsupported",
+        "dr": "no",
+        "supporthours": "08:00-18:00 M-F"
+      },
+      "dependsOn": [
+        "[variables('virtualNetworkName')]"
+      ],
+      "properties": {
+        "scaleUnits": 2,
+        "ipConfigurations": [
+          {
+            "name": "IpConf",
+            "id": "[variables('bastionIPConfRef')]",
+            "properties": {
+              "privateIPAllocationMethod": "dynamic",
+              "publicIPAddress": {
+                "id": "[variables('bastionPublicIPRef')]"
+              },
+              "subnet": {
+                "id": "[variables('labSubnetRef')]"
+              }
+            }
+          }
+        ]
+      },
+      "sku": {
+        "name": "Basic"
+      }
+    },
+    {
+      "name": "[variables('labSubnetnsg')]",
+      "type": "Microsoft.Network/networkSecurityGroups",
+      "apiVersion": "2020-11-01",
+      "location": "[resourceGroup().location]",
+      "tags": {
+        "environment": "r&d",
+        "purpose": "network security group",
+        "region": "uks",
+        "general": "azure stack hci poc environment network security group - azure stack hci lab Subnet",
+        "owner": "chris lorentzen p10357509@capita.co.uk",
+        "costcentre": "jtch",
+        "wbscode": "o1-0001400",
+        "status": "notsupported",
+        "dr": "no",
+        "supporthours": "08:00-18:00 M-F"
+      }
+    },
+    {
+      "name": "[variables('bastionSubnetnsg')]",
+      "type": "Microsoft.Network/networkSecurityGroups",
+      "apiVersion": "2020-11-01",
+      "location": "[resourceGroup().location]",
+      "tags": {
+        "environment": "r&d",
+        "purpose": "network security group",
+        "region": "uks",
+        "general": "azure stack hci poc environment network security group - azure stack hci bastion Subnet",
+        "owner": "chris lorentzen p10357509@capita.co.uk",
+        "costcentre": "jtch",
+        "wbscode": "o1-0001400",
+        "status": "notsupported",
+        "dr": "no",
+        "supporthours": "08:00-18:00 M-F"
+      },
+      "properties": {
+        "securityRules": [
+          {
+            "name": "AllowHttpsInbound",
+            "properties": {
+              "priority": 100,
+              "protocol": "Tcp",
+              "access": "Allow",
+              "description": "Ingress Traffic from public internet",
+              "direction": "Inbound",
+              "sourceAddressPrefix": "Internet",
+              "sourcePortRange": "*",
+              "destinationAddressPrefix": "*",
+              "destinationPortRange": "443"
+            }
+          },
+          {
+            "name": "AllowGatewayManagerInbound",
+            "properties": {
+              "priority": 110,
+              "protocol": "Tcp",
+              "access": "Allow",
+              "description": "Ingress Traffic from Azure Bastion control plane",
+              "direction": "Inbound",
+              "sourceAddressPrefix": "GatewayManager",
+              "sourcePortRange": "*",
+              "destinationAddressPrefix": "*",
+              "destinationPortRange": "443"
+            }
+          },
+          {
+            "name": "AllowAzureLoadBalancerInbound",
+            "properties": {
+              "priority": 120,
+              "protocol": "Tcp",
+              "access": "Allow",
+              "description": "Ingress Traffic from Azure Load Balancer",
+              "direction": "Inbound",
+              "sourceAddressPrefix": "AzureLoadBalancer",
+              "sourcePortRange": "*",
+              "destinationAddressPrefix": "*",
+              "destinationPortRange": "443"
+            }
+          },
+          {
+            "name": "AllowBastionHostCommunication",
+            "properties": {
+              "priority": 130,
+              "protocol": "*",
+              "access": "Allow",
+              "description": "Ingress Traffic from Azure Bastion data plane",
+              "direction": "Inbound",
+              "sourceAddressPrefix": "VirtualNetwork",
+              "sourcePortRange": "*",
+              "destinationAddressPrefix": "VirtualNetwork",
+              "destinationPortRanges": [ "5071","8080" ]
+            }
+          },
+          {
+            "name": "AllowSshRdpOutbound",
+            "properties": {
+              "priority": 100,
+              "protocol": "*",
+              "access": "Allow",
+              "description": "Egress Traffic to target VMs",
+              "direction": "Outbound",
+              "sourceAddressPrefix": "*",
+              "sourcePortRange": "*",
+              "destinationAddressPrefix": "VirtualNetwork",
+              "destinationPortRanges": [ "22","2806","3389" ]
+            }
+          },
+          {
+            "name": "AllowAzureCloudOutbound",
+            "properties": {
+              "priority": 110,
+              "protocol": "*",
+              "access": "Allow",
+              "description": "Egress Traffic to other public endpoints in Azure",
+              "direction": "Outbound",
+              "sourceAddressPrefix": "*",
+              "sourcePortRange": "*",
+              "destinationAddressPrefix": "AzureCloud",
+              "destinationPortRange": "443"
+            }
+          },
+          {
+            "name": "AllowBastionCommunication",
+            "properties": {
+              "priority": 120,
+              "protocol": "*",
+              "access": "Allow",
+              "description": "Egress Traffic to Azure Bastion data plane",
+              "direction": "Outbound",
+              "sourceAddressPrefix": "VirtualNetwork",
+              "sourcePortRange": "*",
+              "destinationAddressPrefix": "VirtualNetwork",
+              "destinationPortRanges": [ "5071","8080" ]
+            }
+          },
+          {
+            "name": "AllowGetSessionInformation",
+            "properties": {
+              "priority": 130,
+              "protocol": "*",
+              "access": "Allow",
+              "description": "Egress Traffic to Internet",
+              "direction": "Outbound",
+              "sourceAddressPrefix": "*",
+              "sourcePortRange": "*",
+              "destinationAddressPrefix": "Internet",
+              "destinationPortRange": "80"
+            }
+          }
+        ]
+      }
+    },
+    {
+      "name": "[parameters('virtualMachineName')]",
+      "type": "Microsoft.Compute/virtualMachines",
+      "apiVersion": "2020-12-01",
+      "location": "[resourceGroup().location]",
+      "tags": {
+        "costcentre": "jtch",
+        "wbscode": "o1-0001400",
+        "owner": "chris lorentzen p10357509@capita.co.uk",
+        "purpose": "azure stack hci poc lab host",
+        "status": "notsupported",
+        "oastatus": "“AD: no OS: yes”",
+        "supporthours": "08:00-18:00 M-F",
+        "patchingschedule": "Monthly_2ndSatAfterPT_2300-0300",
+        "backuppolicy": "vm-2200-instant-3-daily-7-monthly-0-yearly-0",
+        "dr": "no",
+        "environment": "r&d",
+        "restorestate": "no",
+        "osversion": "windows2019",
+        "offshoresupported": "yes",
+        "region": "uks",
+        "general": "azure stack hci poc environment virtual machine - azure stack hci lab host",
+        "shutdownSchedule": "18:00 -> 08:00, Saturday, Sunday"
+      },
+      "dependsOn": [
+        "[concat('Microsoft.Network/networkInterfaces/', variables('networkInterfaceName'))]"
+      ],
+      "properties": {
+        "osProfile": {
+          "computerName": "[parameters('virtualMachineName')]",
+          "adminUsername": "[parameters('adminUsername')]",
+          "adminPassword": "[parameters('adminPassword')]",
+          "windowsConfiguration": {
+            "enableAutomaticUpdates": false,
+            "provisionVmAgent": true,
+            "patchSettings": {
+              "enableHotpatching": "[parameters('enableHotpatching')]",
+              "patchMode": "[parameters('patchMode')]"
+            }
+          }
+        },
+        "hardwareProfile": {
+          "vmSize": "[parameters('virtualMachineSize')]"
+        },
+        "storageProfile": {
+          "imageReference": {
+            "publisher": "MicrosoftWindowsServer",
+            "offer": "WindowsServer",
+            "sku": "[if(equals(parameters('virtualMachineGeneration'), 'Generation 2'), '2019-datacenter-gensecond', '2019-Datacenter')]",
+            "version": "latest"
+          },
+          "osDisk": {
+            "name": "[concat(parameters('virtualMachineName'), '_osdisk')]",
+            "createOption": "FromImage",
+            "managedDisk": {
+              "storageAccountType": "Standard_LRS"
+            }
+          },
+          "copy": [
+            {
+              "name": "dataDisks",
+              "count": "[variables('dataDisksCount')]",
+              "input": {
+                "name": "[concat(parameters('virtualMachineName'),'DataDisk',copyIndex('dataDisks'))]",
+                "diskSizeGB": "[parameters('dataDiskSize')]",
+                "lun": "[copyIndex('dataDisks')]",
+                "createOption": "Empty",
+                "caching": "None",
+                "managedDisk": {
+                  "storageAccountType": "[parameters('dataDiskType')]"
+                }
+              }
+            }
+          ]
+        },
+        "networkProfile": {
+          "networkInterfaces": [
+            {
+              "id": "[resourceId('Microsoft.Network/networkInterfaces', variables('networkInterfaceName'))]"
+            }
+          ]
+        },
+        "diagnosticsProfile": {
+          "bootDiagnostics": {
+            "enabled": true,
+            "storageUri": "[concat('https://', parameters('diagnosticsStorageAccountName'), '.blob.core.windows.net/')]"
+          }
+        },
+        "licenseType": "[if(equals(parameters('alreadyHaveAWindowsServerLicense'), 'Yes'), 'Windows_Server', 'None')]"
+      },
+      "resources": [
+        {
+          "type": "extensions",
+          "name": "InstallWAC",
+          "apiVersion": "2021-03-01",
+          "location": "[resourceGroup().location]",
+          "dependsOn": [
+            "[parameters('virtualMachineName')]"
+          ],
+          "properties": {
+            "publisher": "Microsoft.Compute",
+            "type": "CustomScriptExtension",
+            "typeHandlerVersion": "1.10",
+            "autoUpgradeMinorVersion": true,
+            "settings": {
+              "fileUris": [
+                "[uri(variables('artifactsLocation'), concat('scripts/installWac.ps1'))]"
+              ]
+            },
+            "protectedSettings": {
+              "commandToExecute": "[concat('powershell -ExecutionPolicy Unrestricted -File installWac.ps1', ' -userName ', parameters('adminUsername'))]"
+            }
+          }
+        },
+        {
+          "type": "extensions",
+          "name": "ConfigureAzSHCIHost",
+          "apiVersion": "2021-03-01",
+          "location": "[resourceGroup().location]",
+          "dependsOn": [
+            "[parameters('virtualMachineName')]",
+            "[resourceId('Microsoft.Compute/virtualMachines/extensions', parameters('virtualMachineName'), 'InstallWAC')]"
+          ],
+          "properties": {
+            "publisher": "Microsoft.Powershell",
+            "type": "DSC",
+            "typeHandlerVersion": "2.77",
+            "autoUpgradeMinorVersion": true,
+            "settings": {
+              "wmfVersion": "latest",
+              "configuration": {
+                "url": "[variables('dscUri')]",
+                "script": "azshcihost.ps1",
+                "function": "AzSHCIHost"
+              },
+              "configurationArguments": {
+                "DomainName": "[parameters('domainName')]",
+                "environment": "[variables('environment')]",
+                "enableDHCP": "[parameters('enableDHCP')]",
+                "customRdpPort": "[parameters('customRdpPort')]"
+              }
+            },
+            "protectedSettings": {
+              "configurationArguments": {
+                "adminCreds": {
+                  "UserName": "[parameters('adminUsername')]",
+                  "Password": "[parameters('adminPassword')]"
+                }
+              }
+            }
+          }
+        }
+      ]
+    },
+    {
+      "name": "[concat('shutdown-computevm-', parameters('virtualMachineName'))]",
+      "type": "Microsoft.DevTestLab/schedules",
+      "apiVersion": "2018-09-15",
+      "location": "[resourceGroup().location]",
+      "dependsOn": [
+        "[concat('Microsoft.Compute/virtualMachines/', parameters('virtualMachineName'))]"
+      ],
+      "properties": {
+        "status": "[parameters('autoShutdownStatus')]",
+        "taskType": "ComputeVmShutdownTask",
+        "dailyRecurrence": {
+          "time": "[parameters('autoShutdownTime')]"
+        },
+        "timeZoneId": "[parameters('autoShutdownTimeZone')]",
+        "targetResourceId": "[resourceId('Microsoft.Compute/virtualMachines', parameters('virtualMachineName'))]",
+        "notificationSettings": {
+          "status": "[parameters('autoShutdownNotificationStatus')]",
+          "notificationLocale": "[parameters('autoShutdownNotificationLocale')]",
+          "timeInMinutes": "30",
+          "emailRecipient": "[parameters('autoShutdownNotificationEmail')]"
+        }
+      }
+
+    },
+    {
+      "name": "[concat(parameters('virtualMachineName'),'/', variables('diagnosticsExtensionName'))]",
+      "type": "Microsoft.Compute/virtualMachines/extensions",
+      "apiVersion": "2018-10-01",
+      "location": "[resourceGroup().location]",
+      "properties": {
+        "publisher": "Microsoft.Azure.Diagnostics",
+        "type": "IaaSDiagnostics",
+        "typeHandlerVersion": "1.5",
+        "autoUpgradeMinorVersion": true,
+        "settings": {
+          "StorageAccount": "[parameters('diagnosticsStorageAccountName')]",
+          "WadCfg": {
+            "DiagnosticMonitorConfiguration": {
+              "overallQuotaInMB": 5120,
+              "Metrics": {
+                "resourceId": "[concat('/subscriptions/', subscription().subscriptionId, '/resourceGroups/', resourceGroup().name, '/providers/', 'Microsoft.Compute/virtualMachines/', parameters('virtualMachineName'))]",
+                "MetricAggregation": [
+                  {
+                    "scheduledTransferPeriod": "PT1H"
+                  },
+                  {
+                    "scheduledTransferPeriod": "PT1M"
+                  }
+                ]
+              },
+              "DiagnosticInfrastructureLogs": {
+                "scheduledTransferLogLevelFilter": "Error"
+              },
+              "PerformanceCounters": {
+                "scheduledTransferPeriod": "PT1M",
+                "PerformanceCounterConfiguration": [
+                  {
+                    "counterSpecifier": "\\Processor Information(_Total)\\% Processor Time",
+                    "unit": "Percent",
+                    "sampleRate": "PT60S"
+                  },
+                  {
+                    "counterSpecifier": "\\Processor Information(_Total)\\% Privileged Time",
+                    "unit": "Percent",
+                    "sampleRate": "PT60S"
+                  },
+                  {
+                    "counterSpecifier": "\\Processor Information(_Total)\\% User Time",
+                    "unit": "Percent",
+                    "sampleRate": "PT60S"
+                  },
+                  {
+                    "counterSpecifier": "\\Processor Information(_Total)\\Processor Frequency",
+                    "unit": "Count",
+                    "sampleRate": "PT60S"
+                  },
+                  {
+                    "counterSpecifier": "\\System\\Processes",
+                    "unit": "Count",
+                    "sampleRate": "PT60S"
+                  },
+                  {
+                    "counterSpecifier": "\\Process(_Total)\\Thread Count",
+                    "unit": "Count",
+                    "sampleRate": "PT60S"
+                  },
+                  {
+                    "counterSpecifier": "\\Process(_Total)\\Handle Count",
+                    "unit": "Count",
+                    "sampleRate": "PT60S"
+                  },
+                  {
+                    "counterSpecifier": "\\System\\System Up Time",
+                    "unit": "Count",
+                    "sampleRate": "PT60S"
+                  },
+                  {
+                    "counterSpecifier": "\\System\\Context Switches/sec",
+                    "unit": "CountPerSecond",
+                    "sampleRate": "PT60S"
+                  },
+                  {
+                    "counterSpecifier": "\\System\\Processor Queue Length",
+                    "unit": "Count",
+                    "sampleRate": "PT60S"
+                  },
+                  {
+                    "counterSpecifier": "\\Memory\\% Committed Bytes In Use",
+                    "unit": "Percent",
+                    "sampleRate": "PT60S"
+                  },
+                  {
+                    "counterSpecifier": "\\Memory\\Available Bytes",
+                    "unit": "Bytes",
+                    "sampleRate": "PT60S"
+                  },
+                  {
+                    "counterSpecifier": "\\Memory\\Committed Bytes",
+                    "unit": "Bytes",
+                    "sampleRate": "PT60S"
+                  },
+                  {
+                    "counterSpecifier": "\\Memory\\Cache Bytes",
+                    "unit": "Bytes",
+                    "sampleRate": "PT60S"
+                  },
+                  {
+                    "counterSpecifier": "\\Memory\\Pool Paged Bytes",
+                    "unit": "Bytes",
+                    "sampleRate": "PT60S"
+                  },
+                  {
+                    "counterSpecifier": "\\Memory\\Pool Nonpaged Bytes",
+                    "unit": "Bytes",
+                    "sampleRate": "PT60S"
+                  },
+                  {
+                    "counterSpecifier": "\\Memory\\Pages/sec",
+                    "unit": "CountPerSecond",
+                    "sampleRate": "PT60S"
+                  },
+                  {
+                    "counterSpecifier": "\\Memory\\Page Faults/sec",
+                    "unit": "CountPerSecond",
+                    "sampleRate": "PT60S"
+                  },
+                  {
+                    "counterSpecifier": "\\Process(_Total)\\Working Set",
+                    "unit": "Count",
+                    "sampleRate": "PT60S"
+                  },
+                  {
+                    "counterSpecifier": "\\Process(_Total)\\Working Set - Private",
+                    "unit": "Count",
+                    "sampleRate": "PT60S"
+                  },
+                  {
+                    "counterSpecifier": "\\LogicalDisk(_Total)\\% Disk Time",
+                    "unit": "Percent",
+                    "sampleRate": "PT60S"
+                  },
+                  {
+                    "counterSpecifier": "\\LogicalDisk(_Total)\\% Disk Read Time",
+                    "unit": "Percent",
+                    "sampleRate": "PT60S"
+                  },
+                  {
+                    "counterSpecifier": "\\LogicalDisk(_Total)\\% Disk Write Time",
+                    "unit": "Percent",
+                    "sampleRate": "PT60S"
+                  },
+                  {
+                    "counterSpecifier": "\\LogicalDisk(_Total)\\% Idle Time",
+                    "unit": "Percent",
+                    "sampleRate": "PT60S"
+                  },
+                  {
+                    "counterSpecifier": "\\LogicalDisk(_Total)\\Disk Bytes/sec",
+                    "unit": "BytesPerSecond",
+                    "sampleRate": "PT60S"
+                  },
+                  {
+                    "counterSpecifier": "\\LogicalDisk(_Total)\\Disk Read Bytes/sec",
+                    "unit": "BytesPerSecond",
+                    "sampleRate": "PT60S"
+                  },
+                  {
+                    "counterSpecifier": "\\LogicalDisk(_Total)\\Disk Write Bytes/sec",
+                    "unit": "BytesPerSecond",
+                    "sampleRate": "PT60S"
+                  },
+                  {
+                    "counterSpecifier": "\\LogicalDisk(_Total)\\Disk Transfers/sec",
+                    "unit": "BytesPerSecond",
+                    "sampleRate": "PT60S"
+                  },
+                  {
+                    "counterSpecifier": "\\LogicalDisk(_Total)\\Disk Reads/sec",
+                    "unit": "BytesPerSecond",
+                    "sampleRate": "PT60S"
+                  },
+                  {
+                    "counterSpecifier": "\\LogicalDisk(_Total)\\Disk Writes/sec",
+                    "unit": "BytesPerSecond",
+                    "sampleRate": "PT60S"
+                  },
+                  {
+                    "counterSpecifier": "\\LogicalDisk(_Total)\\Avg. Disk sec/Transfer",
+                    "unit": "Count",
+                    "sampleRate": "PT60S"
+                  },
+                  {
+                    "counterSpecifier": "\\LogicalDisk(_Total)\\Avg. Disk sec/Read",
+                    "unit": "Count",
+                    "sampleRate": "PT60S"
+                  },
+                  {
+                    "counterSpecifier": "\\LogicalDisk(_Total)\\Avg. Disk sec/Write",
+                    "unit": "Count",
+                    "sampleRate": "PT60S"
+                  },
+                  {
+                    "counterSpecifier": "\\LogicalDisk(_Total)\\Avg. Disk Queue Length",
+                    "unit": "Count",
+                    "sampleRate": "PT60S"
+                  },
+                  {
+                    "counterSpecifier": "\\LogicalDisk(_Total)\\Avg. Disk Read Queue Length",
+                    "unit": "Count",
+                    "sampleRate": "PT60S"
+                  },
+                  {
+                    "counterSpecifier": "\\LogicalDisk(_Total)\\Avg. Disk Write Queue Length",
+                    "unit": "Count",
+                    "sampleRate": "PT60S"
+                  },
+                  {
+                    "counterSpecifier": "\\LogicalDisk(_Total)\\% Free Space",
+                    "unit": "Percent",
+                    "sampleRate": "PT60S"
+                  },
+                  {
+                    "counterSpecifier": "\\LogicalDisk(_Total)\\Free Megabytes",
+                    "unit": "Count",
+                    "sampleRate": "PT60S"
+                  },
+                  {
+                    "counterSpecifier": "\\Network Interface(*)\\Bytes Total/sec",
+                    "unit": "BytesPerSecond",
+                    "sampleRate": "PT60S"
+                  },
+                  {
+                    "counterSpecifier": "\\Network Interface(*)\\Bytes Sent/sec",
+                    "unit": "BytesPerSecond",
+                    "sampleRate": "PT60S"
+                  },
+                  {
+                    "counterSpecifier": "\\Network Interface(*)\\Bytes Received/sec",
+                    "unit": "BytesPerSecond",
+                    "sampleRate": "PT60S"
+                  },
+                  {
+                    "counterSpecifier": "\\Network Interface(*)\\Packets/sec",
+                    "unit": "BytesPerSecond",
+                    "sampleRate": "PT60S"
+                  },
+                  {
+                    "counterSpecifier": "\\Network Interface(*)\\Packets Sent/sec",
+                    "unit": "BytesPerSecond",
+                    "sampleRate": "PT60S"
+                  },
+                  {
+                    "counterSpecifier": "\\Network Interface(*)\\Packets Received/sec",
+                    "unit": "BytesPerSecond",
+                    "sampleRate": "PT60S"
+                  },
+                  {
+                    "counterSpecifier": "\\Network Interface(*)\\Packets Outbound Errors",
+                    "unit": "Count",
+                    "sampleRate": "PT60S"
+                  },
+                  {
+                    "counterSpecifier": "\\Network Interface(*)\\Packets Received Errors",
+                    "unit": "Count",
+                    "sampleRate": "PT60S"
+                  }
+                ]
+              },
+              "WindowsEventLog": {
+                "scheduledTransferPeriod": "PT1M",
+                "DataSource": [
+                  {
+                    "name": "Application!*[System[(Level = 1 or Level = 2 or Level = 3)]]"
+                  },
+                  {
+                    "name": "Security!*[System[band(Keywords,4503599627370496)]]"
+                  },
+                  {
+                    "name": "System!*[System[(Level = 1 or Level = 2 or Level = 3)]]"
+                  }
+                ]
+              }
+            }
+          }
+        },
+        "protectedSettings": {
+          "storageAccountName": "[parameters('diagnosticsStorageAccountName')]",
+          "storageAccountKey": "[first(listKeys(parameters('diagnosticsStorageAccountId'),'2019-06-01').keys).value]",
+          "storageAccountEndPoint": "https://core.windows.net/"
+        }
+      },
+      "dependsOn": [
+        "[concat('Microsoft.Compute/virtualMachines/', parameters('virtualMachineName'))]"
+      ]
+    },
+    {
+      "type": "Microsoft.Resources/deployments",
+      "apiVersion": "2021-04-01",
+      "name": "[concat(variables('virtualNetworkName'),'-UpdateDNS')]",
+      "dependsOn": [
+        "[resourceId('Microsoft.Compute/virtualMachines/extensions', parameters('virtualMachineName'), 'ConfigureAzSHCIHost')]"
+      ],
+      "properties": {
+        "mode": "Incremental",
+        "templateLink": {
+          "uri": "[uri(variables('artifactsLocation'), concat('json/updatevnet.json'))]",
+          "contentVersion": "1.0.0.0"
+        },
+        "parameters": {
+          "virtualNetworkName": {
+            "value": "[variables('virtualNetworkName')]"
+          },
+          "virtualNetworkAddressRange": {
+            "value": "[variables('addressPrefix')]"
+          },
+          "labSubnetName": {
+            "value": "[variables('labSubnetName')]"
+          },
+          "labSubnetRange": {
+            "value": "[variables('labSubnetPrefix')]"
+          },
+          "labSubnetnsgid": {
+            "value": "[variables('labnsgid')]"
+          },
+          "bastionSubnetName": {
+            "value": "[variables('bastionSubnetName')]"
+          },
+          "bastionSubnetRange": {
+            "value": "[variables('bastionSubnetName')]"
+          },
+          "bastionSubnetnsgid": {
+            "value": "[variables('bastionnsgid')]"
+          },
+          "DNSServerAddress": {
+            "value": [
+              "[variables('privateIPAddress')]"
+            ]
+          },
+          "location": {
+            "value": "[resourceGroup().location]"
+          }
+        }
+      }
+    }
+  ],
+  "outputs": {
+    "adminUsername": {
+      "type": "string",
+      "value": "[parameters('adminUsername')]"
+    },
+    "rdpPort": {
+      "type": "string",
+      "value": "[parameters('customRdpPort')]"
+    }
+  }
+}
