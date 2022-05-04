@@ -2,12 +2,6 @@
     "$schema": "https://schema.management.azure.com/schemas/2019-04-01/deploymentTemplate.json#",
     "contentVersion": "1.0.0.0",
   "parameters": {
-    "bastionNSGid": {
-      "type": "string",
-      "metadata": {
-        "description": "The NSG for the bastion Subnet created in the new VNET"
-      }
-    },
     "bastionSubnetName": {
       "type": "string",
       "metadata": {
@@ -24,12 +18,6 @@
       "type": "array",
       "metadata": {
         "description": "The DNS address(es) of the DNS Server(s) used by the VNET"
-      }
-    },
-    "labNSGid": {
-      "type": "string",
-      "metadata": {
-        "description": "The NSG for the lab Subnet created in the new VNET"
       }
     },
     "labSubnetName": {
@@ -64,41 +52,35 @@
     }
   },
     "resources": [
-        {
-            "type": "Microsoft.Network/virtualNetworks",
-            "name": "[parameters('virtualNetworkName')]",
-            "apiVersion": "2020-11-01",
-            "location": "[parameters('location')]",
-            "properties": {
-                "addressSpace": {
-                    "addressPrefixes": [
-                        "[parameters('virtualNetworkAddressRange')]"
-                    ]
-                },
-                "dhcpOptions": {
-                    "dnsServers": "[parameters('DNSServerAddress')]"
-                },
-                "Subnets": [
-                    {
-                        "name": "[parameters('labSubnetName')]",
-                        "properties": {
-                            "addressPrefix": "[parameters('labSubnetRange')]",
-							"networkSecurityGroup": {
-								"id": "[parameters('labNSGid')]"
-							}
-                        },
-					{
-                        "name": "[parameters('bastionSubnetName')]",
-                        "properties": {
-                            "addressPrefix": "[parameters('bastionSubnetRange')]",
-							"networkSecurityGroup": {
-								"id": "[parameters('bastionNSGid')]"
-							}
-                        }
-                    }
-                    }
+      {
+          "type": "Microsoft.Network/virtualNetworks",
+          "name": "[parameters('virtualNetworkName')]",
+          "apiVersion": "2020-11-01",
+          "location": "[parameters('location')]",
+          "properties": {
+             "addressSpace": {
+                "addressPrefixes": [
+                   "[parameters('virtualNetworkAddressRange')]"
                 ]
+          },
+          "dhcpOptions": {
+             "dnsServers": "[parameters('DNSServerAddress')]"
+          },
+          "Subnets": [
+            {
+               "name": "[parameters('labSubnetName')]",
+               "properties": {
+                 "addressPrefix": "[parameters('labSubnetRange')]"
+                 },
+					    {
+               "name": "[parameters('bastionSubnetName')]",
+               "properties": {
+                 "addressPrefix": "[parameters('bastionSubnetRange')]"
+							   }
+              }
             }
+          ]
         }
+      }
     ]
 }

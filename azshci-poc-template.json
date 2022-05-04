@@ -974,17 +974,11 @@
           "labSubnetRange": {
             "value": "[variables('labSubnetPrefix')]"
           },
-          "labNSGid": {
-            "value": "[variables('labNSGid')]"
-          },
           "bastionSubnetName": {
             "value": "[variables('bastionSubnetName')]"
           },
           "bastionSubnetRange": {
             "value": "[variables('bastionSubnetPrefix')]"
-          },
-          "bastionNSGid": {
-            "value": "[variables('bastionNSGid')]"
           },
           "DNSServerAddress": {
             "value": [
