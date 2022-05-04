@@ -357,9 +357,10 @@
       }
     },
     {
-      "type": "Microsoft.Resources/deployments",
-      "apiVersion": "2021-04-01",
+      "type": "Microsoft.Network/virtualNetworks",
       "name": "[variables('virtualNetworkName')]",
+      "apiVersion": "2020-11-01",
+      "location": "[resourceGroup().location]",
       "tags": {
         "environment": "r&d",
         "purpose": "virtual network",
@@ -373,40 +374,31 @@
         "supporthours": "08:00-18:00 M-F"
       },
       "properties": {
-        "mode": "Incremental",
-        "templateLink": {
-          "uri": "[uri(variables('artifactsLocation'), concat('json/vnet.json'))]",
-          "contentVersion": "1.0.0.0"
+        "addressSpace": {
+          "addressPrefixes": [
+            "[variables('addressPrefix')]"
+          ]
         },
-        "parameters": {
-          "virtualNetworkName": {
-            "value": "[variables('virtualNetworkName')]"
+        "Subnets": [
+          {
+            "name": "[variables('labSubnetName')]",
+            "properties": {
+              "addressPrefix": "[variables('labSubnetPrefix')]",
+              "networkSecurityGroup": {
+                "id": "[variables('labNSGid')]"
+              }
+            }
           },
-          "virtualNetworkAddressRange": {
-            "value": "[variables('addressPrefix')]"
-          },
-          "labSubnetName": {
-            "value": "[variables('labSubnetName')]"
-          },
-          "labSubnetRange": {
-            "value": "[variables('labSubnetPrefix')]"
-          },
-          "labNSGid": {
-            "value": "[variables('labNSGid')]"
-          },
-          "bastionSubnetName": {
-            "value": "[variables('bastionSubnetName')]"
-          },
-          "bastionSubnetRange": {
-            "value": "[variables('bastionSubnetPrefix')]"
-          },
-          "bastionNSGid": {
-            "value": "[variables('bastionNSGid')]"
-          },
-          "location": {
-            "value": "[resourceGroup().location]"
+          {
+            "name": "[variables('bastionSubnetName')]",
+            "properties": {
+              "addressPrefix": "[variables('bastionSubnetPrefix')]",
+              "networkSecurityGroup": {
+                "id": "[variables('bastionNSGid')]"
+              }
+            }
           }
-        }
+        ]
       }
     },
     {
