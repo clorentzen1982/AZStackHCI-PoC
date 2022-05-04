@@ -190,7 +190,7 @@
     {
       "name": "pip-s-bas-b-vnet-uks-poc-azshci-network",
       "type": "Microsoft.Network/publicIpAddresses",
-      "apiVersion": "2020-11-01",
+      "apiVersion": "2021-05-01",
       "location": "[resourceGroup().location]",
       "sku": {
         "name": "Standard",
@@ -206,7 +206,7 @@
     {
       "name": "[variables('labSubnetnsg')]",
       "type": "Microsoft.Network/networkSecurityGroups",
-      "apiVersion": "2020-11-01",
+      "apiVersion": "2021-05-01",
       "location": "[resourceGroup().location]",
       "tags": {
         "environment": "r&d",
@@ -224,7 +224,7 @@
     {
       "name": "[variables('bastionSubnetnsg')]",
       "type": "Microsoft.Network/networkSecurityGroups",
-      "apiVersion": "2020-11-01",
+      "apiVersion": "2021-05-01",
       "location": "[resourceGroup().location]",
       "tags": {
         "environment": "r&d",
@@ -358,7 +358,7 @@
     {
       "type": "Microsoft.Network/virtualNetworks",
       "name": "[variables('virtualNetworkName')]",
-      "apiVersion": "2020-11-01",
+      "apiVersion": "2021-05-01",
       "location": "[resourceGroup().location]",
       "tags": {
         "environment": "r&d",
@@ -403,7 +403,7 @@
     {
       "name": "[variables('networkInterfaceName')]",
       "type": "Microsoft.Network/networkInterfaces",
-      "apiVersion": "2020-11-01",
+      "apiVersion": "2021-05-01",
       "location": "[resourceGroup().location]",
       "tags": {
         "environment": "r&d",
@@ -480,7 +480,7 @@
     {
       "name": "[parameters('virtualMachineName')]",
       "type": "Microsoft.Compute/virtualMachines",
-      "apiVersion": "2020-12-01",
+      "apiVersion": "2021-11-01",
       "location": "[resourceGroup().location]",
       "tags": {
         "costcentre": "jtch",
@@ -571,7 +571,7 @@
         {
           "type": "extensions",
           "name": "InstallWAC",
-          "apiVersion": "2021-03-01",
+          "apiVersion": "2021-11-01",
           "location": "[resourceGroup().location]",
           "dependsOn": [
             "[parameters('virtualMachineName')]"
@@ -594,7 +594,7 @@
         {
           "type": "extensions",
           "name": "ConfigureAzSHCIHost",
-          "apiVersion": "2021-03-01",
+          "apiVersion": "2021-11-01",
           "location": "[resourceGroup().location]",
           "dependsOn": [
             "[parameters('virtualMachineName')]",
@@ -659,7 +659,7 @@
     {
       "name": "[concat(parameters('virtualMachineName'),'/', variables('diagnosticsExtensionName'))]",
       "type": "Microsoft.Compute/virtualMachines/extensions",
-      "apiVersion": "2018-10-01",
+      "apiVersion": "2021-11-01",
       "location": "[resourceGroup().location]",
       "properties": {
         "publisher": "Microsoft.Azure.Diagnostics",
