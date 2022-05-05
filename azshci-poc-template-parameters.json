@@ -20,12 +20,6 @@
     "dataDiskSize": {
       "value": "128"
     },
-    "adminUsername": {
-      "value": "d-azshciadmin"
-    },
-    "adminPassword": {
-      "value": "h7RACli9xHQliiBY"
-    },
     "enableDHCP": {
       "value": "Enabled"
     },
