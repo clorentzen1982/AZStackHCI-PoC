@@ -18,7 +18,7 @@
       "value": "StandardSSD_LRS"
     },
     "dataDiskSize": {
-      "value": "128"
+      "value": "256"
     },
     "enableDHCP": {
       "value": "Enabled"
