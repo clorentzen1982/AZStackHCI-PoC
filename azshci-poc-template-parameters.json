@@ -20,7 +20,7 @@
     "adminPassword": {
       "reference": {
         "keyVault": {
-          "id": "/subscriptions/6d4d671b-3535-48bf-b9f1-f2f36369205c/resourceGroups/rg-uks-azshci-poc/providers/Microsoft.KeyVault/vaults/kv-uks-azshci-poc-deploy-01"
+          "id": "/subscriptions/6d4d671b-3535-48bf-b9f1-f2f36369205c/resourceGroups/rg-uks-azshci-poc/providers/Microsoft.KeyVault/vaults/kv-uks-azshci-poc-deploy"
         },
         "secretName": "adminPassword"
       }

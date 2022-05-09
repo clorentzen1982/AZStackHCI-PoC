@@ -16,9 +16,9 @@ Write-Host "Chris Lorentzen Azure Stack HCI PoC Build" -ForegroundColor Green
 Write-Host "Version 1.2" -ForegroundColor Green
 Get-Date -UFormat "%d-%m-%Y %T"
 
-Write-Host "Stage 1 - Update Powershell Modules" -ForegroundColor Green
-Get-Date -UFormat "%d-%m-%Y %T"
-Update-Module Az
+#Write-Host "Stage 1 - Update Powershell Modules" -ForegroundColor Green
+#Get-Date -UFormat "%d-%m-%Y %T"
+#Update-Module Az
 
 Write-Host "Stage 2 - Authenticate to Azure" -ForegroundColor Green
 Get-Date -UFormat "%d-%m-%Y %T"
@@ -41,9 +41,9 @@ $resourceGroupName = Read-Host -Prompt "Enter the Resource Group name"
 
 Write-Host "Stage 6 - Create Deployment Key Vault" -ForegroundColor Green
 Get-Date -UFormat "%d-%m-%Y %T"
-New-AzKeyvault -name 'kv-uks-azshci-poc-deploy-01' -ResourceGroupName $resourceGroupName -Location 'UK South' -EnabledForTemplateDeployment -Tag @{costcentre='jtch';wbscode='o1-0001400';owner='chris lorentzen p10357509@capita.co.uk';purpose='key vault';region='uks';status='notsupported';environment='r&d';monitoring='no';supporthours='08:00-18:00 M-F';general='azure stack hci poc environment key vault for deployment';dr='no'}
-Set-AzKeyVaultAccessPolicy -ObjectID 78d5de75-79c9-4426-8e0d-8bf77a4c9888 -VaultName 'kv-uks-azshci-poc-deploy-01' -PermissionsToSecrets get,list,set,delete,backup,restore,recover -PermissionsToKeys get,list,update,create,import,delete,backup,restore,recover -PassThru
-Set-AzKeyVaultSecret -VaultName 'kv-uks-azshci-poc-deploy-01' -Name 'adminPassword' -SecretValue (Read-Host -Prompt 'Enter default domain admin account password' -AsSecureString)
+New-AzKeyvault -name 'kv-uks-azshci-poc-deploy' -ResourceGroupName $resourceGroupName -Location 'UK South' -EnabledForTemplateDeployment -Tag @{costcentre='jtch';wbscode='o1-0001400';owner='chris lorentzen p10357509@capita.co.uk';purpose='key vault';region='uks';status='notsupported';environment='r&d';monitoring='no';supporthours='08:00-18:00 M-F';general='azure stack hci poc environment key vault for deployment';dr='no'}
+Set-AzKeyVaultAccessPolicy -ObjectID 78d5de75-79c9-4426-8e0d-8bf77a4c9888 -VaultName 'kv-uks-azshci-poc-deploy' -PermissionsToSecrets get,list,set,delete,backup,restore,recover -PermissionsToKeys get,list,update,create,import,delete,backup,restore,recover -PassThru
+Set-AzKeyVaultSecret -VaultName 'kv-uks-azshci-poc-deploy' -Name 'adminPassword' -SecretValue (Read-Host -Prompt 'Enter default domain admin account password' -AsSecureString)
 
 Write-Host "Stage 7 - Deploy AzureStack HCI PoC Environment" -ForegroundColor Green
 Get-Date -UFormat "%d-%m-%Y %T"

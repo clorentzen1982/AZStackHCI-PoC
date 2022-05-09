@@ -1,0 +1,14 @@
+{
+  "ExpandedNodes": [
+    "",
+    "\\dsc\\azshcihost\\ActiveDirectoryDsc\\6.0.1\\DSCResources\\MSFT_ADDomainController\\en-US",
+    "\\dsc\\azshcihost\\ActiveDirectoryDsc\\6.0.1\\Modules\\ActiveDirectoryDsc.Common",
+    "\\dsc\\azshcihost\\StorageDsc\\5.0.1",
+    "\\dsc\\azshcihost\\StorageDsc\\5.0.1\\DSCResources",
+    "\\dsc\\azshcihost\\StorageDsc\\5.0.1\\DSCResources\\DSC_WaitForDisk",
+    "\\dsc\\azshcihost\\StorageDsc\\5.0.1\\DSCResources\\DSC_WaitForDisk\\en-US",
+    "\\dsc\\azshcihost\\StorageDsc\\5.0.1\\Modules"
+  ],
+  "SelectedNode": "\\dsc",
+  "PreviewInSolutionExplorer": false
+}
